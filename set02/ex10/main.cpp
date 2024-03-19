@@ -10,11 +10,13 @@
 
 // The file here is intelligible (somewhat) when CBC decrypted against "YELLOW SUBMARINE" with an IV of all ASCII 0 (\x00\x00\x00 &c)
 
+// compile using -lcryptopp -L/path/to/cryptopp/lib
+
 #include <iostream>
 #include <cstring>
 #include <fstream> // File handling
-#include <iomanip> // for std::hex, std::setw, and std::setfill
-#include <vector>
+// #include <iomanip> // for std::hex, std::setw, and std::setfill
+// #include <vector>
 #include "functions.h"
 using namespace std;
 
@@ -23,7 +25,6 @@ using namespace std;
 int main(){
   unsigned char hexArray[4000] = {0}; // Store number as value after base64 decoding.
   unsigned char encrypted[4000] = {0};
-//   unsigned char decrypted[4000] = {0};
 
   ifstream file("10.txt");
   string line;
