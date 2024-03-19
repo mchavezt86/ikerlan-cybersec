@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <iomanip>
 using namespace std;
 
 // Implement PKCS#7 padding
@@ -66,7 +67,7 @@ int main(){
     if (i<strLen){
       cout << input[i];
     } else{
-      cout << uint(input[i]) << hex;
+      cout << "\\x" << hex << setw(2) << setfill('0') << uint(input[i]);
     }
     
   }
