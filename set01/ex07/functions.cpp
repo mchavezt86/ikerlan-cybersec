@@ -3,7 +3,13 @@
 // #include <sstream>
 // #include <vector>
 #include <fstream>
+
+#include <crypto++/aes.h>
+#include <crypto++/modes.h>
+#include <crypto++/filters.h>
+
 #include "functions.h"
+// #include <crypto++/modes.h>
 using namespace std;
 
 uint base64Char(unsigned char c){
@@ -54,14 +60,34 @@ void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint*
 }
 
 void aes128ecb(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
-//   cout << theKey << endl;
-//   for (uint i=0;i<keyLen;i++){
-//     cout << theKey[i];
-//   }
-//   cout << endl;
+
+  CryptoPP::byte encryptedData[hexSize];// = {0x76, 0x55, 0x0E, 0x47, 0x8D, 0x2F, 0x0B, 0x74, 0x9A, 0x59, 0x38, 0x39, 0xF7, 0x8F, 0x8C, 0xE2};
+  CryptoPP::byte key[keyLen];// = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x97, 0x6E, 0x5D, 0x21, 0x47, 0x0E};
+
+  //Fill the data
+  for (uint i=0;i<hexSize;i++){
+    encryptedData[i] = (CryptoPP::byte)hexArray[i];
+  }
+  // Fill the key
+  for (uint i=0;i<keyLen;i++){
+    key[i] = (CryptoPP::byte)theKey[i];
+  }
+
+  // Decrtyption data storage and engine
+  CryptoPP::ECB_Mode<CryptoPP::AES>::Decryption decryption(key, sizeof(key));
+  CryptoPP::byte decryptedData[sizeof(encryptedData)];
+  
+  // The decryption
+  decryption.ProcessData(decryptedData, encryptedData, sizeof(encryptedData));
+
+  // Decrypt the data
+  decryption.ProcessData(decryptedData, encryptedData, sizeof(encryptedData));
+
 
   for (uint i=0;i<hexSize;i++){
-    output[i]=hexArray[i] ^ theKey[i%keyLen];
-    cout << uint(output[i] )<< ", " << uint(hexArray[i]) << ", " << uint(theKey[i%keyLen]) << endl;
+    // output[i]=hexArray[i] ^ theKey[i%keyLen];
+    // cout << uint(output[i] )<< ", " << uint(hexArray[i]) << ", " << uint(theKey[i%keyLen]) << endl;
+    cout << std::hex << static_cast<char>(decryptedData[i]) << " ";
   }
+  cout << endl;
 }

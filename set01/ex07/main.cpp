@@ -10,6 +10,8 @@
 
 // Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher. 
 
+// TO COMPILE: -lcryptopp -L/path/to/cryptopp/lib
+
 #include <iostream>
 #include <cstring>
 #include <fstream> // File handling
