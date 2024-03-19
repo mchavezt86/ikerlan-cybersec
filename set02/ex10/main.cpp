@@ -23,7 +23,7 @@ using namespace std;
 int main(){
   unsigned char hexArray[4000] = {0}; // Store number as value after base64 decoding.
   unsigned char encrypted[4000] = {0};
-  unsigned char decrypted[4000] = {0};
+//   unsigned char decrypted[4000] = {0};
 
   ifstream file("10.txt");
   string line;
@@ -33,9 +33,9 @@ int main(){
   while (getline(file, line)) { //Read each line.
     const char* input = line.c_str();
     strLen = strlen(input);
-    // decodeBase64(input, strLen, hexArray, &valIndex);
-    memcpy(&hexArray[valIndex],input,sizeof(char)*strLen);
-    valIndex += strLen;
+    decodeBase64(input, strLen, hexArray, &valIndex);
+    // memcpy(&hexArray[valIndex],input,sizeof(char)*strLen);
+    // valIndex += strLen;
   }
   file.close();
 
@@ -51,7 +51,12 @@ int main(){
 
 //   aes128ecb_decrypt(encrypted,decrypted,32,theKey,16);
 
-  aes128cbc_encrypt();
+  aes128cbc_decrypt(hexArray,encrypted,valIndex,theKey,keyLen,iv);
+
+  for (uint i=0;i<valIndex;i++){
+    cout << char(encrypted[i]);
+  }
+  cout << endl;
 
   return 0;
 }

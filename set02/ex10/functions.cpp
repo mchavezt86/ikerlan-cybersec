@@ -10,34 +10,9 @@
 #include "functions.h"
 using namespace std;
 
-void xor_buffers(unsigned char* b1, unsigned char* b2, char* result, uint buffer_size){
-  for (uint i=0;i<buffer_size;i+=2){
-    //Variables to traverse the array
-    char *temp1 = new char[2];
-    char *temp2 = new char[2];
-    stringstream ss1, ss2, ssxor;
-    uint hex1, hex2, hexXor;
-
-    // Array traverse 2 by 2
-    memcpy(temp1,b1+i,2);
-    memcpy(temp2,b2+i,2);
-
-    // Convert to hex using string stream
-    ss1 << hex << temp1;
-    ss2 << hex << temp2;
-
-    ss1 >> hex1;
-    ss2 >> hex2;
-
-    hexXor = hex1 ^ hex2;
-
-    ssxor << hex << hexXor;
-
-    // cout << ssxor.str().c_str();
-    memcpy(result+i,ssxor.str().c_str(),2);
-
-    delete[] temp1;
-    delete[] temp2;
+void xor_buffers(unsigned char* b1, unsigned char* b2, unsigned char* result, uint buffer_size){
+  for (uint i=0;i<buffer_size;i++){
+    result[i] = b1[i] ^ b2[i];
   }
 }
 
@@ -110,11 +85,6 @@ void aes128ecb_decrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   // Fill the data
   memcpy(encryptedData,hexArray,hexSize);
 
-  for (uint i=0;i<hexSize;i++){
-    cout << uint(encryptedData[i]) << ",";
-  }
-  cout << endl;
-
   // Fill the key
   memcpy(key,theKey,keyLen);
 
@@ -133,9 +103,9 @@ void aes128ecb_decrypt(unsigned char* hexArray, unsigned char* output, uint hexS
     // cout << uint(output[i] )<< ", " << uint(hexArray[i]) << ", " << uint(theKey[i%keyLen]) << endl;
     output[i] = static_cast<unsigned char>(decryptedData[i]);
     // cout << std::hex << static_cast<char>(decryptedData[i]) << " ";
-    cout << decryptedData[i];
+    // cout << decryptedData[i];
   }
-  cout << endl;
+//   cout << endl;
 }
 
 void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
@@ -150,16 +120,36 @@ void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   
   // The decryption
   encryption.ProcessData(output, hexArray, hexSize);
-  // for (uint i=0;i<hexSize;i+=sizeof(key)){
-  //   decryption.ProcessData(&decryptedData[i], &encryptedData[i], sizeof(key));
-  // }
+}
 
-  for (uint i=0;i<hexSize;i++){
-    // output[i]=hexArray[i] ^ theKey[i%keyLen];
-    // cout << uint(output[i] )<< ", " << uint(hexArray[i]) << ", " << uint(theKey[i%keyLen]) << endl;
-    // output[i] = static_cast<unsigned char>(output[i]);
-    // cout << std::hex << static_cast<char>(decryptedData[i]) << " ";
-    cout << uint(output[i]) << ",";
+void aes128cbc_encrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen, const unsigned char* iv){
+  
+  unsigned char xored[keyLen];
+  unsigned char currentIV[keyLen];
+  // First IV is the constant iv
+  memcpy(currentIV,iv,(sizeof(char)*keyLen));
+  for (uint i=0;i<hexSize;i+=keyLen){
+    // xor
+    xor_buffers(&(hexArray[i]),currentIV,xored,keyLen);
+    // encrypt ECB
+    aes128ecb_encrypt(xored,&(output[i]),keyLen,theKey,keyLen);
+    // update iv
+    memcpy(currentIV,&(output[i]),(sizeof(char)*keyLen));
   }
-  cout << endl;
+}
+
+void aes128cbc_decrypt(unsigned char* input, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen, const unsigned char* iv){
+  
+  unsigned char tmp[keyLen];
+  unsigned char currentIV[keyLen];
+  // First IV is the constant iv
+  memcpy(currentIV,iv,(sizeof(char)*keyLen));
+  for (uint i=0;i<hexSize;i+=keyLen){
+    // decrypt ECB
+    aes128ecb_decrypt(&(input[i]),tmp,keyLen,theKey,keyLen);
+    // xor
+    xor_buffers(tmp,currentIV,&(output[i]),keyLen);
+    // update iv
+    memcpy(currentIV,&(input[i]),(sizeof(char)*keyLen));
+  }
 }
