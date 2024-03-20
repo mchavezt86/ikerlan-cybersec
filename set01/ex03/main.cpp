@@ -30,7 +30,17 @@ uint repLetters[REP_LETTERS_SIZE] = {'e','o','l','s','t','f','m','p','c','n','E'
 Note: printable ASCII range from 32 (space) to 126 (~), others are not part of English
 */
 
-/* function to convert string to hex*/
+/* [The logic of this code is flawed but is corrected in for the next exercise.]
+   This particular string has a characteristic feature: it has repeated characters. Repeated characters are not
+   much common in English with a few exceptions. The repLetters array contains the letters with possibility to 
+   repeat, such as "ee" - seen, "oo"- foot, "tt" - attain, 'f' - affair and so on.
+   To verify, we count the frequency and see if the most repeated character is part of the letters from the 
+   alphabet */
+
+/* function strToHex: convert string to hex
+   - input: char pointer to input, uint pointer to results, uint length of the input
+   - output: stored in result
+*/
 void strToHex(char* input, uint* result, uint strLen){
   for (uint i=0;i<strLen;i+=2){
     // Variables to traverse the array
@@ -51,24 +61,18 @@ void strToHex(char* input, uint* result, uint strLen){
   }
 }
 
-/* function to find consecutives numbers in an array */
-void findConsecutives(uint* hexInput, int hexLen, vector<uint>& rep){
-  for (uint i=0;i<hexLen-1;i++){
-    if (hexInput[i] == hexInput[i+1]){
-      rep.push_back(i);
-      // Test for repetition
-      //cout << "Repetition at: " << i << endl;
-    }
-  }
-}
-
-/* function to find features of the string*/
+/* function stringFeatures: function to find features of the string
+   - input: uint pointer to input in numerical version, uint length of the input, vector to store repetitinos
+      and uint pointer to store the frequency of a particular encoded character.
+   - output: stored in rep vector and counters pointer.
+  Attempts to find the consecutives and stores is in a vector while saving the frequency of the encoded character..
+*/
 void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counters){
   for (uint i=0;i<hexLen-1;i++){
-    // counters index is the hex value
+    // counters index is the hex value and the content of the array is the frequency.
     counters[hexInput[i+1]]++;
 
-    // Find consecutives
+    // Find consecutives and push it to vector.
     if (hexInput[i] == hexInput[i+1]){
       rep.push_back(i);
       // Test for
@@ -80,32 +84,39 @@ void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counter
   counters[hexInput[hexLen-1]]++;
 }
 
-/* function to check if consecutives have information*/
+/* function stringsAnalysis: function to check if consecutives have information
+   - input: uint pointer to input in numerical version, uint length of the input, vector with indexes of 
+    repetitions, uint pointer with the frequency the encoded characters.
+   - output: stored in key vector, with possible keys.
+  Using the repeated characters stored in the repetitions vector, the code iterates these encoded characters
+  and XORes against the array with characters that are most repeated in English to recover possible keys.
+  Then compares the most repeated character to an array that stores the most repeated characters in English.
+*/
 void stringsAnalysis(uint* hexInput, uint hexLen,vector<uint> rep, uint* counters, vector<uint>& keys){
   uint max = 0, max_i;
-  // uint possibleKeys[REP_LETTERS_SIZE];
 
   // Consecutives can be from repLetters
   while (!rep.empty()){
     uint index = rep.back();
     rep.pop_back();
 
-    /*cout << "value: " << hexInput[index] << ", xor(e): " << (hexInput[index] ^ 101) << endl;
-    cout << "value: " << hexInput[index] << ", xor(o): " << (hexInput[index] ^ 111) << endl;*/
-
+    /* Loop to find the most repeated encoded character, the index is the numerical value of this character*/
     for (uint i=0;i<TOTAL_ASCII;i++){
-    if (counters[i]>max){
-      max = counters[i];
-      max_i = i; //This stores the most repeated character
-    }
+      if (counters[i]>max){
+        max = counters[i];
+        max_i = i; //This stores the most repeated character
+      }
   }
-
+    /* Loop the letters that are most likely to be repeated in English and XOR it agains the found repeated
+       charactesr, to get the potential key. */
     for (uint i=0;i<REP_LETTERS_SIZE;i++){
-      // possibleKeys[i] = hexInput[index] ^ repLetters[i];
-      //cout << "most counter letter with key " << char(possibleKeys[i]) << ", is " << char(max_i ^ possibleKeys[i]) << "("<< (max_i ^ possibleKeys[i]) << ")" << endl;
+      /* Computed possible key from the repetitions in English and the repetition found in the input*/
       uint tmpKey = hexInput[index] ^ repLetters[i];
+      /* tmpChar stores the possible decoded most repeated character, decoded using the computed key */
       uint tmpChar = max_i ^ tmpKey;
 
+      /* If the most frequent character, decoded with the possible key, is part of the alphabet or is a
+        spaces we store the key */
       if ((tmpChar == ' ') || ((tmpChar > 'A' && tmpChar < 'Z') || (tmpChar > 'a' && tmpChar < 'z'))){
         keys.push_back(tmpKey);
       }
@@ -141,22 +152,13 @@ int main(){
   // Convert string input to hex
   strToHex(input, hexInput, strLen);
 
-  // Printing values to test
-  // cout << "hex values: ";
-  // for (uint i=0;i<hexLen;i++){
-  //   cout << hexInput[i] << ", ";
-  // }
-  // cout << endl;
-
-  // Find consecutives chars
-  // findConsecutives(hexInput, hexLen, repetitions);
-
   // Extract features of string: character count and consecutives characters.
   stringFeatures(hexInput, hexLen, repetitions, counters);
 
   // Analysis of the features, keys stores the possible keys.
   stringsAnalysis(hexInput, hexLen, repetitions, counters, keys);
 
+  // Using the most likely key we decode the whole message.
   while(!keys.empty()){
     uint finalKey = keys.back();
     keys.pop_back();

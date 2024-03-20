@@ -1,9 +1,3 @@
-#include <iostream>
-#include <cstring>
-#include <sstream>
-using namespace std;
-
-
 /*
 Fixed XOR
 
@@ -22,8 +16,19 @@ If your function works properly, then when you feed it the string:
 746865206b696420646f6e277420706c6179
 */
 
+#include <iostream>
+#include <cstring>
+#include <sstream>
+using namespace std;
+
 const int BUFFER_SIZE = 36;
 
+/* Not much logic. Get input convert it from Hex string to numbers*/
+
+/* function toBase64:
+   - input: buffer_1, buffer_2, result buffer and buffer size
+   - output: result buffer.
+   */
 void xor_buffers(char* b1, char* b2, char* result, uint buffer_size){
   for (uint i=0;i<buffer_size;i+=2){
     //Variables to traverse the array
@@ -32,11 +37,11 @@ void xor_buffers(char* b1, char* b2, char* result, uint buffer_size){
     stringstream ss1, ss2, ssxor;
     uint hex1, hex2, hexXor;
 
-    // Array traverse 2 by 2
+    // Array traverse 2 by 2, to read two Hex digits.
     memcpy(temp1,b1+i,2);
     memcpy(temp2,b2+i,2);
 
-    // Convert to hex using string stream
+    // Leverage string stream to directly convert Hex digits to numbers.
     ss1 << hex << temp1;
     ss2 << hex << temp2;
 
@@ -47,7 +52,7 @@ void xor_buffers(char* b1, char* b2, char* result, uint buffer_size){
 
     ssxor << hex << hexXor;
 
-    // cout << ssxor.str().c_str();
+    // Copy result to output buffer.
     memcpy(result+i,ssxor.str().c_str(),2);
 
     delete[] temp1;

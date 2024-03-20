@@ -36,6 +36,8 @@
 
 // Decrypt the string at the top of this function, then use your CTR function to encrypt and decrypt other things. 
 
+// compile with -lcryptopp -L/path/to/cryptopp/lib
+
 #include <iostream>
 #include <cstring>
 #include <fstream> // File handling
