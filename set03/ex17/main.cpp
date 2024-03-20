@@ -42,6 +42,8 @@
 
 // It is easy to get tripped up on the fact that CBC plaintexts are "padded". Padding oracles have nothing to do with the actual padding on a CBC plaintext. It's an attack that targets a specific bit of code that handles decryption. You can mount a padding oracle on any CBC block, whether it's padded or not.
 
+// compile with -lcryptopp -L/path/to/cryptopp/lib
+
 #include <iostream>
 #include <cstring>
 #include <fstream> // File handling
@@ -50,36 +52,19 @@
 using namespace std;
 
 int main(){
-  unsigned char hexArray[400] = {0}; // Store number as value after base64 decoding.
-  
-  ifstream file("17.txt");
-  string line;
-  uint valIndex = 0;
-  uint strLen;
-  
-  // Generate key
+  uint full_size;
+  unsigned char iv[key_size];
+  unsigned char output[max_size];
   unsigned char key[key_size];
-  random_key(key);
 
-  // Generate random number for row between 0 and 9
-  uint row = uint(random_byte()) % 10;
-  uint row_counter = 0;
-  
-  while (getline(file, line)) { //Read each line.
-    if (row_counter == row){
-      const char* input = line.c_str();
-      strLen = strlen(input);
-      decodeBase64(input, strLen, hexArray, &valIndex);
-      break;
-    }
-    row_counter++;
+  fullAES(output,key,iv,&full_size);
+
+//   output[full_size-2] = 4;
+
+  if (padding_check(output,key,iv,full_size)){
+    cout << "Padding correct" << endl;
   }
-  file.close();
-
-  valIndex = padding(hexArray, valIndex, key_size);
-
-  for (uint i=0;i<valIndex;i++){
-    cout << uint(hexArray[i]);
+  else{
+    cout << "Padding incorrect" << endl;
   }
-  cout << endl;
 }

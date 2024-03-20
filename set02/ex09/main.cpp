@@ -23,29 +23,32 @@ using namespace std;
 
 const int BUFFER_SIZE = 100;
 
-void padding(char* input, uint strLen, uint blockSize){
+uint padding(char* input, uint strLen, uint blockSize){
 //   cout << blockSize << "," << strLen << endl;
   uint pad;
+  
   if (blockSize / strLen > 0){
     pad = blockSize - strLen;
-  } else if ((blockSize / strLen < 0)){
+  } else{
     uint div = (strLen / blockSize);
     pad = blockSize - (strLen - (div * blockSize));
     cout << pad << endl;
-  } else {
-    pad = 0;
   }
-    
+  if (pad == 0){
+    pad = blockSize;
+  }
+
   for (uint i=0;i<pad;i++){
     input[strLen+i] = pad;
     // cout << pad << endl;
   }
+  return strLen + pad;
 }
 
 int main(){
   // Input variable
   char *input = new char[BUFFER_SIZE+1];
-  uint strLen,blockSize,nblocks;
+  uint strLen,strLen_pad,blockSize,nblocks;
   string blockStr;
 
   //Read input
@@ -62,10 +65,10 @@ int main(){
   blockSize = stoi(blockStr);
 
   // Apply padding to original input
-  padding(input,strLen,blockSize);
-  nblocks = strLen / blockSize + 1;
+  strLen_pad = padding(input,strLen,blockSize);
+  // strLen = strLen / blockSize + 1;
 
-  for (uint i=0;i<blockSize*nblocks;i++){
+  for (uint i=0;i<strLen_pad;i++){
     if (i<strLen){
       cout << input[i];
     } else{
