@@ -28,10 +28,12 @@ void padding(char* input, uint strLen, uint blockSize){
   uint pad;
   if (blockSize / strLen > 0){
     pad = blockSize - strLen;
-  } else{
+  } else if ((blockSize / strLen < 0)){
     uint div = (strLen / blockSize);
     pad = blockSize - (strLen - (div * blockSize));
     cout << pad << endl;
+  } else {
+    pad = 0;
   }
     
   for (uint i=0;i<pad;i++){
