@@ -39,6 +39,13 @@
 #include "functions.h"
 using namespace std;
 
+/* This codes follows the logic outlined in the chalenge: 
+  - Finds the Hamming distance for different key sizes. We notice that the distance is high for several key sizes,
+    thus we use all of the highest above certain thrshold.
+  - Based on each possible key size and the transponse version of the input (and our previous code) the code 
+    computes each of the keys of the full key (size of the key size) and gives a score.
+  - The highest score is the final key.*/
+
 int main(){
   
 //   cout << "Hamming distance between 't' and 'w': " << hammingByte('t','w') << endl;
@@ -47,7 +54,7 @@ int main(){
 
 //   cout << "Hamming distance between " << s1 << " and " << s2 << " is: " << hammingString(s1,s2,14) << endl;
 
-  char hexArray[4000] = {0}; // Store number as value after base64 decoding.
+  unsigned char hexArray[4000] = {0}; // Store number as value after base64 decoding.
 
   ifstream file("6.txt");
   string line;
@@ -55,9 +62,15 @@ int main(){
   uint strLen;
   // Vector for the keys
   vector<uint> keyPossibleSize;
-  vector<char> finalKeys;
+  vector<unsigned char> finalKeys;
   // Max score for final key calculation
   uint maxScore = 0;
+
+  // Check if the file is opened successfully
+  if (!file.is_open()) {
+    cerr << "Failed to open the file." << endl;
+    return 1;
+  }
  
   while (getline(file, line)) { //Read each line.
     const char* input = line.c_str();
@@ -66,12 +79,7 @@ int main(){
   }
 
   file.close();
-  
-//   cout << "Hex array: ";
-//   for (uint i=0;i<valIndex;i++){
-//     cout << hex << setw(2) << setfill('0') << uint(hexArray[i]);
-//   }
-//   cout << endl;
+
   cout << "Lenght in hex: " << valIndex << endl;
 
 //   uint keySize = keySizeCalc(hexArray, valIndex);
@@ -87,17 +95,17 @@ int main(){
 
     uint transLen = valIndex/keySize;
 
-    char newKeys[keySize] = {0};
+    unsigned char newKeys[keySize] = {0};
 
     for (uint i=0;i<keySize;i++){
       // cout << i << endl;
-      char transp[transLen] = {0};
+      unsigned char transp[transLen] = {0};
       // Array to count frequencies
       uint counters[TOTAL_ASCII] = {0};
       for (uint j=0;j<transLen;j++){
           transp[j] = hexArray[j*keySize+i];
       }
-      stringFeatures(transp,transLen,counters);
+      // stringFeatures(transp,transLen,counters);
       newKeys[i] = stringsAnalysis(transp,transLen,counters);
       // cout << "Key " << i << ": " << newKeys[i] << endl;
     }
@@ -115,7 +123,7 @@ int main(){
     // cout << endl;
   }
 
-  char theFinalKey[finalKeys.size()];
+  unsigned char theFinalKey[finalKeys.size()];
   uint indexKeys = finalKeys.size();
   uint theFinalSize = finalKeys.size();
 

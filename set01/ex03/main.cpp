@@ -31,11 +31,13 @@ Note: printable ASCII range from 32 (space) to 126 (~), others are not part of E
 */
 
 /* [The logic of this code is flawed but is corrected in for the next exercise.]
-   This particular string has a characteristic feature: it has repeated characters. Repeated characters are not
-   much common in English with a few exceptions. The repLetters array contains the letters with possibility to 
-   repeat, such as "ee" - seen, "oo"- foot, "tt" - attain, 'f' - affair and so on.
-   To verify, we count the frequency and see if the most repeated character is part of the letters from the 
-   alphabet */
+   This particular string has a particular feature: it has consecutive characters. Consecutive characters are not
+   very common in English with a few exceptions. The repLetters array contains the letters with the possible
+   consecutive characters, such as "ee" - seen, "oo"- foot, "tt" - attain, 'f' - affair and so on. Using this
+   we retrieve a set of possible keys.
+   To verify, we count the frequency of the encoded characater and decode the most frequent encoded character. Then
+   we decode it using the possible keys and if the most repeated character is part of the letters from the 
+   alphabet, we found the key */
 
 /* function strToHex: convert string to hex
    - input: char pointer to input, uint pointer to results, uint length of the input
@@ -65,7 +67,8 @@ void strToHex(char* input, uint* result, uint strLen){
    - input: uint pointer to input in numerical version, uint length of the input, vector to store repetitinos
       and uint pointer to store the frequency of a particular encoded character.
    - output: stored in rep vector and counters pointer.
-  Attempts to find the consecutives and stores is in a vector while saving the frequency of the encoded character..
+  Attempts to find the consecutive characters and stores is in a vector while saving the frequency of the 
+  encoded characters.
 */
 void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counters){
   for (uint i=0;i<hexLen-1;i++){
@@ -88,9 +91,11 @@ void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counter
    - input: uint pointer to input in numerical version, uint length of the input, vector with indexes of 
     repetitions, uint pointer with the frequency the encoded characters.
    - output: stored in key vector, with possible keys.
-  Using the repeated characters stored in the repetitions vector, the code iterates these encoded characters
-  and XORes against the array with characters that are most repeated in English to recover possible keys.
-  Then compares the most repeated character to an array that stores the most repeated characters in English.
+  Using the found consecutive characters stored in the repetitions vector, the code iterates these encoded
+  characters and XORes against the array with characters that of the consecutive characters that appear 
+  most in English to recover possible keys. Then compares the most repeated encoded character in the encoded
+  string to an array that stores the most repeated characters in English. If the decoded most repeated 
+  character is part of the alphabet or is a space, the key is correct.
 */
 void stringsAnalysis(uint* hexInput, uint hexLen,vector<uint> rep, uint* counters, vector<uint>& keys){
   uint max = 0, max_i;

@@ -37,7 +37,11 @@ void strToHex(const char* input, uint* result, uint strLen){
   }
 }
 
-/* function to find features of the string*/
+/* function stringFeatures: finds the frequency of each ASCII character in the string.
+   - input: char * to the input, int length of input, vector to store consecutives and uint* to store frequency
+      of each ASCII character.
+   - output: consecutive vector and uint * to frequency array
+*/
 void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counters){
   for (uint i=0;i<hexLen-1;i++){
     // counters index is the hex value
@@ -46,8 +50,6 @@ void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counter
     // Find consecutives
     if (hexInput[i] == hexInput[i+1]){
       rep.push_back(i);
-      // Test for
-    //   cout << "Repetition at: " << i << endl;
     }
   }
 
@@ -55,11 +57,19 @@ void stringFeatures(uint* hexInput, int hexLen, vector<uint>& rep, uint* counter
   counters[hexInput[hexLen-1]]++;
 }
 
-/* function to check if consecutives have information*/
+/* function stringsAnalysis: based on the features found (consecutive, character frequency and score), tries to 
+    find possible keys.
+   - input: char array input, uint length of the input, vector for consecutives, uint* for counter of frequencies
+            vector pointer for key storage, vector pointer for score storage, vector pointer for key storage 
+            based on score.
+   - output: vectors and arrays. One vector for consecutive characters, a uint * for the frequency of each character
+            and a key vector to store the possible key based on consecutive charactar. Two vectors (score,scoreKey)
+            stores the max score for each string and the key that produces it.
+*/
 void stringsAnalysis(uint* hexInput, uint hexLen, vector<uint> rep, uint* counters, vector<uint>& keys, vector<uint>& score, vector<uint>& scoreKeys){
   uint max = 0, max_i;
 
-  // Consecutives can be from repLetters
+  // Consecutives can be from repLetters array in header (functions.h)
   while (!rep.empty()){
     uint index = rep.back();
     rep.pop_back();
@@ -81,15 +91,21 @@ void stringsAnalysis(uint* hexInput, uint hexLen, vector<uint> rep, uint* counte
     }
   }
 
-  /* Score based on frequency: we have an array with weights, where the index is the number of the ASCII char. For earch decoded value, we use  */
+  /* Score based on frequency: we have an array with weights for all ASCII characters, where the index is 
+     the number of the ASCII char. 
+     We decode each string for all possible keys, while computing the score based on the ranking array in the 
+     header file (functions.h), which gives a weight for each ASCII based on its frequency in the English 
+     language. We store the maximum score for each string, and the key that produces it. */
   uint maxScore = 0,maxKey;
   /* Try all keys */
   for (uint key=0;key<TOTAL_ASCII;key++){
     uint calcScore = 0;
     for (uint i=0;i<hexLen;i++){
+      // Increment score based on ranking
       calcScore += ranking[(hexInput[i] ^ key)];
     }
     if (calcScore>maxScore){
+      // But only store the maximum for each string.
       maxScore = calcScore;
       maxKey = key;
     }
@@ -99,6 +115,10 @@ void stringsAnalysis(uint* hexInput, uint hexLen, vector<uint> rep, uint* counte
   scoreKeys.push_back(maxKey);
 }
 
+/* function validChar: checks if a character is valid.
+   - input: char
+   - output: boleean. True if th character is valid.
+*/
 bool validChar(char chr){
   bool result;
 

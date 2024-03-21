@@ -12,6 +12,8 @@
 
 // TO COMPILE: -lcryptopp -L/path/to/cryptopp/lib
 
+/* For this solution, and from now on eveytime AES ECB is required, the code uses Crypto++*/
+
 #include <iostream>
 #include <cstring>
 #include <fstream> // File handling
@@ -21,13 +23,19 @@
 using namespace std;
 
 int main(){
-  unsigned char hexArray[4000] = {0}; // Store number as value after base64 decoding.
-//   char output[4000] = {0};
+  // hexArray is the number after base664 decoding.
+  unsigned char hexArray[4000] = {0};
 
   ifstream file("7.txt");
   string line;
   uint valIndex = 0;
   uint strLen;
+
+  // Check if the file is opened successfully
+  if (!file.is_open()) {
+    cerr << "Failed to open the file." << endl;
+    return 1;
+  }
 
   while (getline(file, line)) { //Read each line.
     const char* input = line.c_str();

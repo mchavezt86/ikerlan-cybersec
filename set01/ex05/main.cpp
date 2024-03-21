@@ -27,7 +27,6 @@ int main(){
 
   char *input = new char[BUFFER_SIZE];
   char *output = new char[BUFFER_SIZE];
-//   char key[3] = {'I', 'C', 'E'};
   char byte;
   uint sizeBytes = 0;
   
@@ -48,9 +47,8 @@ int main(){
   }
   sizeBytes--;
   
+  //Function has the main logic
   repKeyXOR(input, output, key, sizeBytes, sizeof(key));
-
-//   cout << "Size in bytes: " << sizeBytes << endl;
 
   for (uint i=0; i<sizeBytes;i++){
     cout << hex << setw(2) << setfill('0') << uint(output[i]);

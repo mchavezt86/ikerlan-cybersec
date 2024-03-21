@@ -6,6 +6,15 @@
 
 // (Your code from #3 should help.)
 
+/* The code from the previous Challenge 3 is not useful due to the logic used in that challenge: repetition of
+    one character. This is not generic, as we are now presented with a set of strings that do not necessary
+    have repeated characters (and are valid) or strings that have repeated characters but are valid.
+    
+    The logic used for this challenge is to try the consecutive loop around all possible keys. For each key, the decoded string is
+    ranked based on an array (defined in the header file functions.h) which gives to each ASCII character a 
+    score based on its frequency on the English language
+*/
+
 #include <iostream>
 #include <cstring>
 #include <vector>
@@ -15,8 +24,7 @@
 using namespace std;
 
 int main(){
-  // Input variables
-//   char *input = new char[BUFFER_SIZE+1];
+  // Input variable
   uint *hexInput = new uint[BUFFER_SIZE/2];
 
   // Array to count frequencies
@@ -32,13 +40,13 @@ int main(){
   // Store possible keys from repetitions
   vector<uint> repKeys;
 
-  // Score
+  // Store scores in a vector
   vector<uint> scores;
 
-  // Store scores
+  // Store the keys for each score
   vector<uint> scoreKeys;
 
-  // What scored-based analysis finds
+  // What scored-based analysis: we want the max score and the key that produces it.
   uint maxScore;
   uint maxIndex;
   uint maxKey;
@@ -72,9 +80,6 @@ int main(){
     // Number of lines
     nlines++;
 
-    // cout << "Length: " << strLen << endl;
-    // cout << "Hex Lenght: " << hexLen << endl;
-
     // Convert string input to hex
     strToHex(input, hexInput, strLen);
 
@@ -82,19 +87,19 @@ int main(){
     stringFeatures(hexInput, hexLen, repetitions, counters);
 
     // Analysis of the features, keys stores the possible keys.
+    /* Aside from the consecutive approach, we store the (max) score for each string and the key
+      that produces this max score. */
     stringsAnalysis(hexInput, hexLen, repetitions, counters, repKeys, scores, scoreKeys);
 
+    /* Try the consecutive character approach, but check if the decoded result has only valid 
+      characters (letters, puntuacion, spaces)*/    
     while(!repKeys.empty()){
-        // uint finalKey = keys.back();
         finalKey = repKeys.back();
         repKeys.pop_back();
         correctness = true;
         for (uint i=0;i<hexLen;i++){
-          // cout << char(hexInput[i] ^ finalKey);
-          // cout << "H: " << hexInput[i] << ", key: " << finalKey << ". ";
           uint tmpVal = hexInput[i] ^ finalKey;
           if (!validChar(tmpVal)){
-            // cout << tmpVal << endl;
             correctness = false;
             break;
           }
@@ -102,24 +107,18 @@ int main(){
             break;
           }
         }
-        // cout << endl;
-        // cin.get();
     }
 
     if (correctness == true){
       repRound++;
-    //   cout << "found sth: " << line.c_str() << endl;
       for (uint i=0;i<hexLen;i++){
-        // cout << "H: " << hexInput[i] << ", key: " << finalKey << ". ";
-        // cout << "(" << (hexInput[i] ^ finalKey) << ", " << char(hexInput[i] ^ finalKey) << "), ";
         cout << char(hexInput[i] ^ finalKey);
       }
       cout << endl;
-      // cin.get();
     }
   }
 
-  /* Repetition leads to nowhere, let's try scores*/
+  /* Consectuive approach leads to nowhere, let's try with the max score per string (line from file)*/
   if (repRound == 0){
     maxScore = *max_element(scores.begin(), scores.end());
     maxIndex = distance(scores.begin(),find(scores.begin(),scores.end(),maxScore));
@@ -130,12 +129,12 @@ int main(){
   file.close();
 
   // Read file line by line
-  //ifstream file("4.txt");
   file.clear();
   file.open("4.txt");
 
   nlines = 0;
-  // Loop to print
+
+  // Loop to print with the string and key that produces the highest score 
   while (getline(file, line)) {
     if (nlines == maxIndex){
       const char* input = line.c_str();
