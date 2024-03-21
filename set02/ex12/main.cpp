@@ -27,10 +27,12 @@
 //    (2) Detect that the function is using ECB. You already know, but do this step anyways.
 //    (3) Knowing the block size, craft an input block that is exactly 1 byte short (for instance, if the block size is 8 bytes, make "AAAAAAA"). Think about what the oracle function is going to put in that last byte position.
 //    (4) Make a dictionary of every possible last byte by feeding different strings to the oracle; for instance, "AAAAAAAA", "AAAAAAAB", "AAAAAAAC", remembering the first block of each invocation.
-//    (5)Match the output of the one-byte-short input to one of the entries in your dictionary. You've now discovered the first byte of unknown-string.
+//    (5) Match the output of the one-byte-short input to one of the entries in your dictionary. You've now discovered the first byte of unknown-string.
 //    (6) Repeat for the next byte.
 
 // compile with -lcryptopp -L/path/to/cryptopp/lib
+
+/* This code implement this logic.*/
 
 #include <iostream>
 #include <cstring>
@@ -60,6 +62,7 @@ int main(){
   // Output
   unsigned char output[valIndex];
 
+  // Find the block size
   uint block_size = find_block_size(hexArray,valIndex,key);
 
   aes128ecb_encrypt(hexArray,output,valIndex,key,key_size);

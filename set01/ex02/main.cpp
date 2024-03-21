@@ -25,10 +25,10 @@ const int BUFFER_SIZE = 36;
 
 /* Not much logic. Get input convert it from Hex string to numbers*/
 
-/* function toBase64:
+/* function xor_buffers:
    - input: buffer_1, buffer_2, result buffer and buffer size
-   - output: result buffer.
-   */
+   - output: result buffer, with byte-wise XOR of input buffers
+*/
 void xor_buffers(char* b1, char* b2, char* result, uint buffer_size){
   for (uint i=0;i<buffer_size;i+=2){
     //Variables to traverse the array

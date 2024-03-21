@@ -21,8 +21,18 @@ using namespace std;
 
 // "YELLOW SUBMARINE\x04\x04\x04\x04"
 
+/* Direct solution:
+  Compute the size of the padding accounting these options:
+  1) The block size is larger than the message -> padding lenght is just a substraction
+  2) The message is larger than the block size -> we need to divide and the remainder is the padding length
+  3) If the message lenght is a multiple of the block size, add a full block as padding. */
+
 const int BUFFER_SIZE = 100;
 
+/* function padding: Adds padding to an array.
+   - input: char * to the input, uint for the input lenght and uint for block size.
+   - output: uint with the final lenght, including padding.
+*/
 uint padding(char* input, uint strLen, uint blockSize){
 //   cout << blockSize << "," << strLen << endl;
   uint pad;
@@ -30,8 +40,9 @@ uint padding(char* input, uint strLen, uint blockSize){
   if (blockSize / strLen > 0){
     pad = blockSize - strLen;
   } else{
-    uint div = (strLen / blockSize);
-    pad = blockSize - (strLen - (div * blockSize));
+    // uint div = (strLen / blockSize);
+    // pad = blockSize - (strLen - (div * blockSize));
+    pad = strLen % blockSize;
     cout << pad << endl;
   }
   if (pad == 0){

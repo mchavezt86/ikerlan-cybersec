@@ -11,6 +11,10 @@
 #include "functions.h"
 using namespace std;
 
+/* function random_byte:
+   - input: none
+   - output: a randon unsigned char.
+*/
 unsigned char random_byte(){
   // Seed the random number generator
   random_device rd;
@@ -22,6 +26,12 @@ unsigned char random_byte(){
   return (unsigned char)dist(gen);
 }
 
+/* function random_key:
+   - input: char * to the key
+   - output: char * to the key
+   The implementation loops the kay until the size defined by the global key_size and stores a random
+   byte to the key array.
+*/
 void random_key(unsigned char* key){
   // Seed the random number generator
   random_device rd;
@@ -35,6 +45,10 @@ void random_key(unsigned char* key){
   }
 }
 
+/* function base64Char: gives a number based on the base64 digit.
+   - input: char base64 digit
+   - output: uint number 
+*/
 uint base64Char(char c){
   uint value;
   if ((c >= 'A') && (c <= 'Z')){
@@ -54,6 +68,11 @@ uint base64Char(char c){
   return value;
 }
 
+/* function decodeBase64: decodes a base64 input into a hex (number) array
+   - input: char * to the input, uint for input size, unsigned char * to output and uint * to
+    the final size of the output.
+   - output: unsigned char * to the output and its size.
+*/
 void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint* valIndex){
     /* Check the padding.*/
   uint nvalues = strLen * 3 / 4;
@@ -73,22 +92,44 @@ void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint*
     (*valIndex)++;
     hexArray[*valIndex] = char((byteValue) & 0xFF);
     (*valIndex)++;
+
+    /* Check padding */
+    if(input[i+2]=='='){
+        (*valIndex)--;
+    }
+    if(input[i+3]=='='){
+        (*valIndex)--;
+    }
+
   }
   for (uint i=0;i<*valIndex;i++){
     hexArray[i]=(hexArray[i] & 0xFF);
   }
 }
 
+/* function xor_buffers:
+   - input: buffer_1, buffer_2, result buffer and buffer size
+   - output: result buffer, with byte-wise XOR of input buffers
+*/
 void xor_buffers(unsigned char* b1, unsigned char* b2, unsigned char* result, uint buffer_size){
   for (uint i=0;i<buffer_size;i++){
     result[i] = b1[i] ^ b2[i];
   }
 }
 
+/* function aes128ecb_encrypt: encrypts a message using AES ECB 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key
+    and uint for the key size.
+   - output: unsigned char * to the output.
+  The implementation is straightforward:
+  - Crate variables required by the decryption function, in the format of the CryptoCPP byte class.
+  - Instantiate a decription engine (function) using the parameters requried.
+  - Call the ProcessData method to decrypt data. 
+*/
 void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
 
-  CryptoPP::byte key[keyLen];// = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x97, 0x6E, 0x5D, 0x21, 0x47, 0x0E};
-
+  CryptoPP::byte key[keyLen];
+  
   // Fill the key
   memcpy(key,theKey,keyLen);
 
@@ -98,6 +139,7 @@ void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   // The decryption
   encryption.ProcessData(output, hexArray, hexSize);
 }
+
 
 uint find_block_size(unsigned char* hexArray,uint valIndex, unsigned char* key){
   
@@ -113,18 +155,8 @@ uint find_block_size(unsigned char* hexArray,uint valIndex, unsigned char* key){
     // and then the array itself
     memcpy(&(input[i]),hexArray,sizeof(char)*valIndex);
 
-    // for(uint k=0;k<i+2;k++){
-    //   cout << uint(input[k]) << ",";
-    // }
-    // cout << endl;
-
     // Encrypt
     aes128ecb_encrypt(input,output,i+valIndex,key,key_size);
-
-    // for(uint k=0;k<i+2;k++){
-    //   cout << uint(output[k]) << ",";
-    // }
-    // cout << endl;
 
     // Xor the first two blocks and add
     unsigned char xored[i];

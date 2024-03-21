@@ -30,12 +30,6 @@ int main(){
   string input;
   uint outputSize = 0;
 
-  // random_key(key);
-  // for(uint i=0;i<key_size;i++){
-  //   cout << "0x" << hex << setw(2) << setfill('0') << uint(key[i]) << " ";
-  // }
-  // cout << endl;
-
   // Input
   cout << "Type the input to encrypt: ";
   getline (cin, input);
@@ -50,11 +44,6 @@ int main(){
 
   // This encrypts and returns the real size of the output on outputSize
   encryption_oracle(hexInput,hexOutput,input.length(),&outputSize);
-
-  // for(uint i=0;i<outputSize;i++){
-  //   cout << "0x" << hex << setw(2) << setfill('0') << uint(hexOutput[i]) << " ";
-  // }
-  // cout << endl;
 
   return 0;
 }

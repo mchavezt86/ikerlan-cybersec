@@ -10,12 +10,20 @@
 #include "functions.h"
 using namespace std;
 
+/* function xor_buffers:
+   - input: buffer_1, buffer_2, result buffer and buffer size
+   - output: result buffer, with byte-wise XOR of input buffers
+*/
 void xor_buffers(unsigned char* b1, unsigned char* b2, unsigned char* result, uint buffer_size){
   for (uint i=0;i<buffer_size;i++){
     result[i] = b1[i] ^ b2[i];
   }
 }
 
+/* function base64Char: gives a number based on the base64 digit.
+   - input: char base64 digit
+   - output: uint number 
+*/
 uint base64Char(char c){
   uint value;
   if ((c >= 'A') && (c <= 'Z')){
@@ -31,10 +39,14 @@ uint base64Char(char c){
   } else {
     value = 0;
   }
-
   return value;
 }
 
+/* function decodeBase64: decodes a base64 input into a hex (number) array
+   - input: char * to the input, uint for input size, unsigned char * to output and uint * to
+    the final size of the output.
+   - output: unsigned char * to the output and its size.
+*/
 void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint* valIndex){
     /* Check the padding.*/
   uint nvalues = strLen * 3 / 4;
@@ -54,12 +66,24 @@ void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint*
     (*valIndex)++;
     hexArray[*valIndex] = char((byteValue) & 0xFF);
     (*valIndex)++;
+
+    /* Check padding */
+    if(input[i+2]=='='){
+        (*valIndex)--;
+    }
+    if(input[i+3]=='='){
+        (*valIndex)--;
+    }
   }
   for (uint i=0;i<*valIndex;i++){
     hexArray[i]=(hexArray[i] & 0xFF);
   }
 }
 
+/* function padding: Adds padding to an array.
+   - input: char * to the input, uint for the input lenght and uint for block size.
+   - output: uint with the final lenght, including padding.
+*/
 void padding(unsigned char* input, uint strLen, uint blockSize){
 //   cout << blockSize << "," << strLen << endl;
   uint pad;
@@ -77,8 +101,18 @@ void padding(unsigned char* input, uint strLen, uint blockSize){
   }
 }
 
+/* function aes128ecb_decrypt: decrypts a message encrypted using AES ECB 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key
+    and uint for the key size.
+   - output: unsigned char * to the output and its size.
+  The implementation is straightforward:
+  - Crate variables required by the decryption function, in the format of the CryptoCPP byte class.
+  - Instantiate a decription engine (function) using the parameters requried.
+  - Call the ProcessData method to decrypt data. 
+*/
 void aes128ecb_decrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
-
+  
+  // Create CryptoCPP variables
   CryptoPP::byte encryptedData[hexSize];// = {0x76, 0x55, 0x0E, 0x47, 0x8D, 0x2F, 0x0B, 0x74, 0x9A, 0x59, 0x38, 0x39, 0xF7, 0x8F, 0x8C, 0xE2};
   CryptoPP::byte key[keyLen];// = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x97, 0x6E, 0x5D, 0x21, 0x47, 0x0E};
 
@@ -94,23 +128,23 @@ void aes128ecb_decrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   
   // The decryption
   decryption.ProcessData(decryptedData, encryptedData, sizeof(encryptedData));
-  // for (uint i=0;i<hexSize;i+=sizeof(key)){
-  //   decryption.ProcessData(&decryptedData[i], &encryptedData[i], sizeof(key));
-  // }
 
-  for (uint i=0;i<hexSize;i++){
-    // output[i]=hexArray[i] ^ theKey[i%keyLen];
-    // cout << uint(output[i] )<< ", " << uint(hexArray[i]) << ", " << uint(theKey[i%keyLen]) << endl;
-    output[i] = static_cast<unsigned char>(decryptedData[i]);
-    // cout << std::hex << static_cast<char>(decryptedData[i]) << " ";
-    // cout << decryptedData[i];
-  }
-//   cout << endl;
+  //Copy output
+  memcpy(output,decryptedData,sizeof(decryptedData));
 }
 
+/* function aes128ecb_encrypt: encrypts a message using AES ECB 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key
+    and uint for the key size.
+   - output: unsigned char * to the output.
+  The implementation is straightforward:
+  - Crate variables required by the decryption function, in the format of the CryptoCPP byte class.
+  - Instantiate a decription engine (function) using the parameters requried.
+  - Call the ProcessData method to decrypt data. 
+*/
 void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
 
-  CryptoPP::byte key[keyLen];// = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x97, 0x6E, 0x5D, 0x21, 0x47, 0x0E};
+  CryptoPP::byte key[keyLen];
 
   // Fill the key
   memcpy(key,theKey,keyLen);
@@ -122,6 +156,16 @@ void aes128ecb_encrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   encryption.ProcessData(output, hexArray, hexSize);
 }
 
+/* function aes128cbc_encrypt: encrypts a message using AES CBC 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key,
+     uint for the key size and the const char * to the initialization vector
+   - output: unsigned char * to the output.
+  The implementation is straightforward:
+  - Loops the data in blocks with the same size as the key'
+  - XORs the current block with the IV, which is the parameter iv for the first round
+  - Encrypts using AES 128 ECB and stores it in the output array.
+  - Updates the IV.
+*/
 void aes128cbc_encrypt(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen, const unsigned char* iv){
   
   unsigned char xored[keyLen];
@@ -138,6 +182,17 @@ void aes128cbc_encrypt(unsigned char* hexArray, unsigned char* output, uint hexS
   }
 }
 
+/* function aes128cbc_decrypt: encrypts a message using AES CBC 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key,
+     uint for the key size and the const char * to the initialization vector
+   - output: unsigned char * to the output.
+  The implementation is straightforward:
+  - Loops the data in blocks with the same size as the key'
+  - Decrypts using AES 128 ECB and stores it in a temporal array.
+  - XORs the current decrypted block with the IV, which is the parameter iv for the first round
+  - Stores the result in the output array.
+  - Updates the IV.
+*/
 void aes128cbc_decrypt(unsigned char* input, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen, const unsigned char* iv){
   
   unsigned char tmp[keyLen];

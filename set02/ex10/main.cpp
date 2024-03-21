@@ -31,27 +31,18 @@ int main(){
   uint valIndex = 0;
   uint strLen;
 
+  /* Decode base64 to hex*/
   while (getline(file, line)) { //Read each line.
     const char* input = line.c_str();
     strLen = strlen(input);
     decodeBase64(input, strLen, hexArray, &valIndex);
-    // memcpy(&hexArray[valIndex],input,sizeof(char)*strLen);
-    // valIndex += strLen;
   }
   file.close();
 
   //Start with padding
   padding(hexArray,valIndex,keyLen);
 
-//   for (uint i=0;i<100;i++){
-//     cout << hexArray[i];
-//   }
-//   cout << endl;
-
-//   aes128ecb_encrypt(hexArray,encrypted,32,theKey,16);
-
-//   aes128ecb_decrypt(encrypted,decrypted,32,theKey,16);
-
+  //Decrypt message
   aes128cbc_decrypt(hexArray,encrypted,valIndex,theKey,keyLen,iv);
 
   for (uint i=0;i<valIndex;i++){
