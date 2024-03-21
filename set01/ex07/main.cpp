@@ -12,7 +12,7 @@
 
 // TO COMPILE: -lcryptopp -L/path/to/cryptopp/lib
 
-/* For this solution, and from now on eveytime AES ECB is required, the code uses Crypto++*/
+/* For this solution, and from now on eveytime AES ECB is required, the code uses Crypto++ library*/
 
 #include <iostream>
 #include <cstring>
@@ -48,8 +48,9 @@ int main(){
 
   aes128ecb(hexArray, output, valIndex, theKey, keyLen);
 
+/* Printing results */
   for(uint i=0;i<valIndex;i++){
-    // cout << output[i];
+    cout << output[i];
     // cout << hex << setw(2) << setfill('0') << uint(output[i]);
     // cout << hex << setw(2) << setfill('0') << uint(hexArray[i]) << ", ";
   }

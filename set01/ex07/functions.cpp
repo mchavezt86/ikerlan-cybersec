@@ -68,8 +68,18 @@ void decodeBase64(const char* input, uint strLen, unsigned char* hexArray, uint*
   }
 }
 
+/* function aes128ecb: decrypts a message encrypted using AES ECB 128
+   - input: char * to the input, char * to the ooutput, uint for input size, unsigned char * to the key
+    and uint for the key size.
+   - output: unsigned char * to the output and its size.
+  The implementation is straightforward:
+  - Crate variables required by the decryption function, in the format of the CryptoCPP byte class.
+  - Instantiate a decription engine (function) using the parameters requried.
+  - Call the ProcessData method to decrypt data. 
+*/
 void aes128ecb(unsigned char* hexArray, unsigned char* output, uint hexSize, const unsigned char* theKey, uint keyLen){
 
+  // Create CryptoCPP variables
   CryptoPP::byte encryptedData[hexSize];
   CryptoPP::byte key[keyLen];
 
@@ -86,9 +96,6 @@ void aes128ecb(unsigned char* hexArray, unsigned char* output, uint hexSize, con
   // The decryption
   decryption.ProcessData(decryptedData, encryptedData, sizeof(encryptedData));
 
-  for (uint i=0;i<hexSize;i++){
-    output[i] = static_cast<unsigned char>(decryptedData[i]);
-    cout << output[i];
-  }
-  cout << endl;
+  //Copy output
+  memcpy(output,decryptedData,sizeof(decryptedData));
 }
